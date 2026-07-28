@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Market Depth Viewer</title>
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS "Add to Home Screen" support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MarketDepth">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#12121c">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="row">
+    <button id="btnSelectCsv" class="btn">Select CSV</button>
+    <input type="file" id="csvInput" accept=".csv,text/csv" hidden>
+    <span id="csvName" class="muted">No file selected</span>
+  </div>
+  <div class="row">
+    <label>Pair
+      <select id="pairSelect"><option value="">-- select CSV first --</option></select>
+    </label>
+    <label>Bucket
+      <select id="bucketSelect">
+        <option value="0.5">0.5%</option>
+        <option value="1">1%</option>
+        <option value="2">2%</option>
+        <option value="3" selected>3%</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+      </select>
+    </label>
+    <label>Bands/side
+      <select id="bandsSelect">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+    </label>
+  </div>
+</header>
+
+<section class="status-panel">
+  <div class="status-grid">
+    <div><span class="lbl">Pair</span><span id="statPair" class="val">-</span></div>
+    <div><span class="lbl">Symbol</span><span id="statSymbol" class="val">-</span></div>
+    <div><span class="lbl">WS Status</span><span id="statWs" class="val warn">DISCONNECTED</span></div>
+    <div><span class="lbl">Book Size</span><span id="statBookSize" class="val">-</span></div>
+    <div><span class="lbl">Last Update</span><span id="statLastUpdate" class="val">-</span></div>
+  </div>
+  <div class="top-of-book">
+    <div><span class="lbl">Best Bid</span><span id="bestBid" class="big green">-</span></div>
+    <div><span class="lbl">Best Ask</span><span id="bestAsk" class="big red">-</span></div>
+    <div><span class="lbl">Spread</span><span id="spread" class="big">-</span></div>
+  </div>
+</section>
+
+<main class="depth-panels">
+  <section class="panel">
+    <h2>Bids <span class="muted">(below mid)</span></h2>
+    <div class="table-wrap">
+      <table id="bidsTable">
+        <thead><tr><th>Band</th><th>Price Range</th><th>Total Qty</th><th>Lvls</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Asks <span class="muted">(above mid)</span></h2>
+    <div class="table-wrap">
+      <table id="asksTable">
+        <thead><tr><th>Band</th><th>Price Range</th><th>Total Qty</th><th>Lvls</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="footer muted">
+  CSV format: <code>coindcxPair,binancePair</code> per line (header row skipped). Data streams directly from your device to Binance's public API - nothing is sent anywhere else.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
