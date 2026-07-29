@@ -68,29 +68,42 @@
   </div>
 </section>
 
-<section class="range-panel">
-  <div class="range-box">
-    <h3>Bid Range Query <span class="muted">(qty between prices)</span></h3>
-    <div class="range-inputs">
-      <input type="number" id="bidRangeMin" placeholder="Min price" step="any" inputmode="decimal">
-      <span class="muted">to</span>
-      <input type="number" id="bidRangeMax" placeholder="Max price" step="any" inputmode="decimal">
-    </div>
-    <div class="range-result">
-      <div><span class="lbl">Total Qty</span><span id="bidRangeQty" class="big green">-</span></div>
-      <div><span class="lbl">Levels</span><span id="bidRangeLevels" class="val">-</span></div>
-    </div>
+<section class="trade-panel">
+  <h3>Trade Depth Analyzer <span class="muted">(qty between entry and target)</span></h3>
+  <div class="trade-inputs">
+    <label>Entry Price
+      <input type="number" id="tradeEntry" placeholder="Entry price" step="any" inputmode="decimal">
+    </label>
+    <label>Direction
+      <select id="tradeDirection">
+        <option value="long">Long</option>
+        <option value="short">Short</option>
+      </select>
+    </label>
+    <label>Take Profit
+      <input type="number" id="tradeTp" placeholder="TP price" step="any" inputmode="decimal">
+    </label>
+    <label>Stop Loss
+      <input type="number" id="tradeSl" placeholder="SL price" step="any" inputmode="decimal">
+    </label>
   </div>
-  <div class="range-box">
-    <h3>Ask Range Query <span class="muted">(qty between prices)</span></h3>
-    <div class="range-inputs">
-      <input type="number" id="askRangeMin" placeholder="Min price" step="any" inputmode="decimal">
-      <span class="muted">to</span>
-      <input type="number" id="askRangeMax" placeholder="Max price" step="any" inputmode="decimal">
+  <div id="tradeWarning" class="trade-warning muted"></div>
+  <div class="trade-results">
+    <div class="range-box">
+      <h4>Entry &rarr; TP <span id="tpSide" class="muted">-</span></h4>
+      <div class="range-result">
+        <div><span class="lbl">Range</span><span id="tpRangeLabel" class="val">-</span></div>
+        <div><span class="lbl">Total Qty</span><span id="tpQty" class="big green">-</span></div>
+        <div><span class="lbl">Levels</span><span id="tpLevels" class="val">-</span></div>
+      </div>
     </div>
-    <div class="range-result">
-      <div><span class="lbl">Total Qty</span><span id="askRangeQty" class="big red">-</span></div>
-      <div><span class="lbl">Levels</span><span id="askRangeLevels" class="val">-</span></div>
+    <div class="range-box">
+      <h4>Entry &rarr; SL <span id="slSide" class="muted">-</span></h4>
+      <div class="range-result">
+        <div><span class="lbl">Range</span><span id="slRangeLabel" class="val">-</span></div>
+        <div><span class="lbl">Total Qty</span><span id="slQty" class="big red">-</span></div>
+        <div><span class="lbl">Levels</span><span id="slLevels" class="val">-</span></div>
+      </div>
     </div>
   </div>
 </section>

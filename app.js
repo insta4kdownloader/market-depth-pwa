@@ -36,14 +36,19 @@ const pairDropdown = el("pairDropdown");
 const bucketSelect = el("bucketSelect");
 const bandsSelect = el("bandsSelect");
 
-const bidRangeMinEl = el("bidRangeMin");
-const bidRangeMaxEl = el("bidRangeMax");
-const bidRangeQtyEl = el("bidRangeQty");
-const bidRangeLevelsEl = el("bidRangeLevels");
-const askRangeMinEl = el("askRangeMin");
-const askRangeMaxEl = el("askRangeMax");
-const askRangeQtyEl = el("askRangeQty");
-const askRangeLevelsEl = el("askRangeLevels");
+const tradeEntryEl = el("tradeEntry");
+const tradeDirectionEl = el("tradeDirection");
+const tradeTpEl = el("tradeTp");
+const tradeSlEl = el("tradeSl");
+const tradeWarningEl = el("tradeWarning");
+const tpSideEl = el("tpSide");
+const tpRangeLabelEl = el("tpRangeLabel");
+const tpQtyEl = el("tpQty");
+const tpLevelsEl = el("tpLevels");
+const slSideEl = el("slSide");
+const slRangeLabelEl = el("slRangeLabel");
+const slQtyEl = el("slQty");
+const slLevelsEl = el("slLevels");
 
 const statPair = el("statPair");
 const statSymbol = el("statSymbol");
@@ -376,7 +381,14 @@ function formatPrice(n) {
   return s;
 }
 
-// ---------------- Custom price-range query (bids / asks) ----------------
+// ---------------- Trade Depth Analyzer (entry price, direction, TP, SL) ----------------
+//
+// Rule: whichever direction price needs to move (up or down) determines which side of the
+// book it has to "eat through" to get there.
+//   Long,  TP (above entry) -> upward move  -> ASK side, range [entry, TP]
+//   Long,  SL (below entry) -> downward move -> BID side, range [SL, entry]
+//   Short, TP (below entry) -> downward move -> BID side, range [TP, entry]
+//   Short, SL (above entry) -> upward move  -> ASK side, range [entry, SL]
 
 function computeRangeTotal(book, min, max) {
   let total = 0;
@@ -391,37 +403,60 @@ function computeRangeTotal(book, min, max) {
   return { total, levels };
 }
 
-function updateRangeQueries() {
-  const bidMin = parseFloat(bidRangeMinEl.value);
-  const bidMax = parseFloat(bidRangeMaxEl.value);
-  if (!isNaN(bidMin) && !isNaN(bidMax) && bidMax >= bidMin && bidBook.size > 0) {
-    const r = computeRangeTotal(bidBook, bidMin, bidMax);
-    bidRangeQtyEl.textContent = r.total.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
-    bidRangeLevelsEl.textContent = String(r.levels);
-  } else {
-    bidRangeQtyEl.textContent = "-";
-    bidRangeLevelsEl.textContent = "-";
-  }
+function formatQty(n) {
+  return n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "") || "0";
+}
 
-  const askMin = parseFloat(askRangeMinEl.value);
-  const askMax = parseFloat(askRangeMaxEl.value);
-  if (!isNaN(askMin) && !isNaN(askMax) && askMax >= askMin && askBook.size > 0) {
-    const r = computeRangeTotal(askBook, askMin, askMax);
-    askRangeQtyEl.textContent = r.total.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
-    askRangeLevelsEl.textContent = String(r.levels);
+function updateTargetResult(book, entry, target, sideLabel, sideEl, rangeLabelEl, qtyEl, levelsEl) {
+  sideEl.textContent = `(${sideLabel})`;
+  if (isNaN(entry) || isNaN(target) || book.size === 0) {
+    rangeLabelEl.textContent = "-";
+    qtyEl.textContent = "-";
+    levelsEl.textContent = "-";
+    return;
+  }
+  const lo = Math.min(entry, target);
+  const hi = Math.max(entry, target);
+  const r = computeRangeTotal(book, lo, hi);
+  rangeLabelEl.textContent = `${formatPrice(lo)} \u2013 ${formatPrice(hi)}`;
+  qtyEl.textContent = formatQty(r.total);
+  levelsEl.textContent = String(r.levels);
+}
+
+function updateTradeAnalysis() {
+  const entry = parseFloat(tradeEntryEl.value);
+  const direction = tradeDirectionEl.value; // "long" or "short"
+  const tp = parseFloat(tradeTpEl.value);
+  const sl = parseFloat(tradeSlEl.value);
+
+  const warnings = [];
+  if (!isNaN(entry) && !isNaN(tp)) {
+    if (direction === "long" && tp <= entry) warnings.push("TP should be above entry for a long.");
+    if (direction === "short" && tp >= entry) warnings.push("TP should be below entry for a short.");
+  }
+  if (!isNaN(entry) && !isNaN(sl)) {
+    if (direction === "long" && sl >= entry) warnings.push("SL should be below entry for a long.");
+    if (direction === "short" && sl <= entry) warnings.push("SL should be above entry for a short.");
+  }
+  tradeWarningEl.textContent = warnings.join(" ");
+
+  if (direction === "long") {
+    updateTargetResult(askBook, entry, tp, "ask side", tpSideEl, tpRangeLabelEl, tpQtyEl, tpLevelsEl);
+    updateTargetResult(bidBook, entry, sl, "bid side", slSideEl, slRangeLabelEl, slQtyEl, slLevelsEl);
   } else {
-    askRangeQtyEl.textContent = "-";
-    askRangeLevelsEl.textContent = "-";
+    updateTargetResult(bidBook, entry, tp, "bid side", tpSideEl, tpRangeLabelEl, tpQtyEl, tpLevelsEl);
+    updateTargetResult(askBook, entry, sl, "ask side", slSideEl, slRangeLabelEl, slQtyEl, slLevelsEl);
   }
 }
 
-// Recompute immediately on every keystroke, not just on the 300ms refresh tick.
-[bidRangeMinEl, bidRangeMaxEl, askRangeMinEl, askRangeMaxEl].forEach((input) => {
-  input.addEventListener("input", updateRangeQueries);
+// Recompute immediately on every keystroke/selection, not just on the 300ms refresh tick.
+[tradeEntryEl, tradeTpEl, tradeSlEl].forEach((input) => {
+  input.addEventListener("input", updateTradeAnalysis);
 });
+tradeDirectionEl.addEventListener("change", updateTradeAnalysis);
 
 function refreshTables() {
-  updateRangeQueries();
+  updateTradeAnalysis();
 
   if (!activeSymbol || !synced) return;
   if (bidBook.size === 0 || askBook.size === 0) return;
