@@ -34,38 +34,10 @@ Nothing you do in this app is sent to any third party other than Binance.
    Files app, iCloud Drive, or wherever you saved it on your phone.
 2. Pick a pair from the dropdown.
 3. Watch the live bid/ask bands update, bucketed by the % size and band count you choose.
-
-## 4. Live open positions (optional, from CoinDCX)
-
-You can pull your open positions directly instead of typing Entry/TP/SL by hand:
-
-1. **Create a read-only API key on CoinDCX** — go to your CoinDCX API dashboard and
-   create a **new** key with only view/read permissions (no trading, no withdrawal).
-   Don't reuse a key that has trading or withdrawal rights for this.
-2. Make a small local JSON file (see `sample-keys.json` in this folder) with your key
-   and secret:
-   ```json
-   { "apiKey": "your_key", "apiSecret": "your_secret" }
-   ```
-   Save it somewhere on your phone (Files app / iCloud Drive) — **do not** upload this
-   file to GitHub or anywhere else.
-3. In the app, tap **Select Keys File** and pick it, then tap **Refresh Positions**.
-4. Tap any listed open position to auto-fill Entry, Direction, TP, and SL into the
-   Trade Depth Analyzer. If CoinDCX shows no TP or SL set on that position, those
-   fields are left blank for you to fill in manually.
-
-**How this is kept as safe as a client-only app can be:**
-- The keys file is read fresh from disk each time you select it and held only in the
-  page's memory for that session — it's never written to localStorage, never cached
-  by the service worker, and never committed to the GitHub repo.
-- Reloading the page or closing the tab clears it; you'd need to reselect the file.
-- Requests go straight from your phone to CoinDCX's API — there's no relay server.
-
-**Known limitation:** this may simply not work. CoinDCX might not allow browser-based
-(CORS) requests to its private/authenticated endpoints at all, in which case tapping
-Refresh Positions will show an error and you'll need to keep entering trades manually.
-This is a live open question I couldn't test from where this was built — try it and
-see what happens.
+4. Use the **Trade Depth Analyzer** to check liquidity between your entry and targets:
+   enter your Entry Price, pick Long or Short, and enter TP and/or SL. It automatically
+   picks the correct side of the book (ask side for moves up, bid side for moves down)
+   and shows the total quantity and number of price levels between entry and each target.
 
 ## Notes
 

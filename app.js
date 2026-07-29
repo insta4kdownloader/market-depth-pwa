@@ -26,22 +26,11 @@ let askBook = new Map();
 let pendingBuffer = [];
 let lastResyncAtMs = 0;
 
-// CoinDCX credentials - loaded fresh from a local file each session, held only in memory.
-// Never written to localStorage, never sent anywhere except directly to CoinDCX.
-let coindcxApiKey = null;
-let coindcxApiSecret = null;
-
 // ---------------- DOM refs ----------------
 const el = (id) => document.getElementById(id);
 const btnSelectCsv = el("btnSelectCsv");
 const csvInput = el("csvInput");
 const csvName = el("csvName");
-const btnSelectKeys = el("btnSelectKeys");
-const keysFileInput = el("keysFileInput");
-const keysFileName = el("keysFileName");
-const btnRefreshPositions = el("btnRefreshPositions");
-const positionsStatusEl = el("positionsStatus");
-const positionsListEl = el("positionsList");
 const pairSearchInput = el("pairSearchInput");
 const pairDropdown = el("pairDropdown");
 const bucketSelect = el("bucketSelect");
@@ -110,146 +99,6 @@ csvInput.addEventListener("change", () => {
   };
   reader.readAsText(file);
 });
-
-// ---------------- CoinDCX keys file + live open positions ----------------
-//
-// Security model: the keys file is read fresh from disk each time you tap
-// "Select Keys File". Its contents are held only in memory (coindcxApiKey /
-// coindcxApiSecret variables above) for the current page session - never
-// written to localStorage, never cached by the service worker, never sent
-// anywhere except directly from your device to CoinDCX to sign your own
-// requests. Reloading the page clears them; you'd need to reselect the file.
-// Use a READ-ONLY CoinDCX API key for this, not a trade/withdraw-capable one.
-
-btnSelectKeys.addEventListener("click", () => keysFileInput.click());
-
-keysFileInput.addEventListener("change", () => {
-  const file = keysFileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(String(reader.result || "{}"));
-      if (!parsed.apiKey || !parsed.apiSecret) {
-        throw new Error("File must contain \"apiKey\" and \"apiSecret\" fields.");
-      }
-      coindcxApiKey = parsed.apiKey;
-      coindcxApiSecret = parsed.apiSecret;
-      keysFileName.textContent = `Keys loaded (${file.name})`;
-      btnRefreshPositions.disabled = false;
-      positionsStatusEl.textContent = "Ready - tap Refresh Positions.";
-    } catch (ex) {
-      alert("Could not read keys file: " + ex.message);
-    }
-  };
-  reader.readAsText(file);
-  // Clear so re-selecting the same file still fires change, and so the
-  // browser doesn't hold an extra reference to it longer than necessary.
-  keysFileInput.value = "";
-});
-
-async function hmacSha256Hex(secret, message) {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  const sigBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(message));
-  return [...new Uint8Array(sigBuffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-// CoinDCX represents "no TP/SL set" as the literal string "None" (or sometimes 0).
-function parseTrigger(v) {
-  if (v === null || v === undefined) return null;
-  if (typeof v === "string" && v.trim().toLowerCase() === "none") return null;
-  const n = parseFloat(v);
-  if (isNaN(n) || n === 0) return null;
-  return n;
-}
-
-async function fetchOpenPositions() {
-  if (!coindcxApiKey || !coindcxApiSecret) {
-    alert("Select your CoinDCX keys file first.");
-    return;
-  }
-  positionsStatusEl.textContent = "Fetching...";
-  positionsListEl.innerHTML = "";
-
-  try {
-    const body = { timestamp: Date.now(), page: "1", size: "50" };
-    const jsonBody = JSON.stringify(body);
-    const signature = await hmacSha256Hex(coindcxApiSecret, jsonBody);
-
-    const resp = await fetch("https://api.coindcx.com/exchange/v1/derivatives/futures/positions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-AUTH-APIKEY": coindcxApiKey,
-        "X-AUTH-SIGNATURE": signature
-      },
-      body: jsonBody
-    });
-
-    if (!resp.ok) {
-      positionsStatusEl.textContent = `Error (${resp.status}) - check your keys / permissions.`;
-      return;
-    }
-
-    const data = await resp.json();
-    const positions = Array.isArray(data) ? data : [];
-    const openPositions = positions.filter((p) => parseFloat(p.active_pos) !== 0);
-
-    renderPositions(openPositions);
-    positionsStatusEl.textContent = openPositions.length
-      ? `${openPositions.length} open position(s) - tap one to load it below.`
-      : "No open positions.";
-
-  } catch (ex) {
-    // Most likely cause: CoinDCX's private endpoint doesn't allow browser-based
-    // (CORS) requests. This is a network-level failure, not a code bug.
-    positionsStatusEl.textContent = "Request failed - possibly blocked by CORS. You can still enter trades manually below.";
-  }
-}
-
-function renderPositions(positions) {
-  positionsListEl.innerHTML = "";
-  for (const p of positions) {
-    const activePos = parseFloat(p.active_pos);
-    const direction = activePos > 0 ? "long" : "short";
-    const entry = parseFloat(p.avg_price);
-    const tp = parseTrigger(p.take_profit_trigger);
-    const sl = parseTrigger(p.stop_loss_trigger);
-
-    const row = document.createElement("div");
-    row.className = "position-row";
-    row.innerHTML =
-      `<span class="pos-pair">${p.pair}</span>` +
-      `<span class="pos-dir ${direction}">${direction.toUpperCase()}</span>` +
-      `<span class="pos-entry">Entry ${formatPrice(entry)}</span>` +
-      `<span class="pos-tpsl">TP ${tp !== null ? formatPrice(tp) : "-"} / SL ${sl !== null ? formatPrice(sl) : "-"}</span>`;
-    row.addEventListener("click", () => loadPositionIntoAnalyzer(p, direction, entry, tp, sl));
-    positionsListEl.appendChild(row);
-  }
-}
-
-function loadPositionIntoAnalyzer(p, direction, entry, tp, sl) {
-  tradeEntryEl.value = isNaN(entry) ? "" : entry;
-  tradeDirectionEl.value = direction;
-  tradeTpEl.value = tp !== null ? tp : "";
-  tradeSlEl.value = sl !== null ? sl : "";
-  updateTradeAnalysis();
-
-  const coindcxPair = p.pair;
-  if (pairMap.has(coindcxPair)) {
-    pairSearchInput.value = coindcxPair;
-    selectPair(coindcxPair);
-    tradeWarningEl.textContent = "";
-  } else {
-    tradeWarningEl.textContent = `Loaded ${coindcxPair} position data, but it isn't in your loaded CSV - select the matching pair manually above.`;
-  }
-}
-
-btnRefreshPositions.addEventListener("click", fetchOpenPositions);
 
 // ---------------- Searchable pair combobox ----------------
 
