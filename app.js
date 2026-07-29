@@ -31,9 +31,19 @@ const el = (id) => document.getElementById(id);
 const btnSelectCsv = el("btnSelectCsv");
 const csvInput = el("csvInput");
 const csvName = el("csvName");
-const pairSelect = el("pairSelect");
+const pairSearchInput = el("pairSearchInput");
+const pairDropdown = el("pairDropdown");
 const bucketSelect = el("bucketSelect");
 const bandsSelect = el("bandsSelect");
+
+const bidRangeMinEl = el("bidRangeMin");
+const bidRangeMaxEl = el("bidRangeMax");
+const bidRangeQtyEl = el("bidRangeQty");
+const bidRangeLevelsEl = el("bidRangeLevels");
+const askRangeMinEl = el("askRangeMin");
+const askRangeMaxEl = el("askRangeMax");
+const askRangeQtyEl = el("askRangeQty");
+const askRangeLevelsEl = el("askRangeLevels");
 
 const statPair = el("statPair");
 const statSymbol = el("statSymbol");
@@ -76,22 +86,78 @@ csvInput.addEventListener("change", () => {
       return;
     }
     pairMap = parsed;
-    pairSelect.innerHTML = "";
-    for (const key of pairMap.keys()) {
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = key;
-      pairSelect.appendChild(opt);
-    }
+    pairSearchInput.disabled = false;
+    pairSearchInput.value = "";
     // Auto-select the first pair
-    pairSelect.selectedIndex = 0;
-    pairSelect.dispatchEvent(new Event("change"));
+    const firstKey = pairMap.keys().next().value;
+    selectPair(firstKey);
   };
   reader.readAsText(file);
 });
 
-pairSelect.addEventListener("change", () => {
-  const coindcxPair = pairSelect.value;
+// ---------------- Searchable pair combobox ----------------
+
+function renderDropdown(filterText) {
+  const filter = (filterText || "").trim().toLowerCase();
+  const keys = [...pairMap.keys()];
+  const matches = filter
+    ? keys.filter((k) => k.toLowerCase().includes(filter))
+    : keys;
+
+  pairDropdown.innerHTML = "";
+
+  if (matches.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "dropdown-empty";
+    empty.textContent = "No matching pairs";
+    pairDropdown.appendChild(empty);
+  } else {
+    // Cap rendered rows for performance on very large CSVs; search still covers everything typed.
+    for (const key of matches.slice(0, 200)) {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+      item.textContent = key;
+      if (filter) {
+        const idx = key.toLowerCase().indexOf(filter);
+        if (idx >= 0) {
+          item.innerHTML = key.slice(0, idx) + "<mark>" + key.slice(idx, idx + filter.length) + "</mark>" + key.slice(idx + filter.length);
+        }
+      }
+      item.addEventListener("mousedown", (e) => {
+        // mousedown (not click) so it fires before the input's blur hides the dropdown
+        e.preventDefault();
+        pairSearchInput.value = key;
+        hideDropdown();
+        selectPair(key);
+      });
+      pairDropdown.appendChild(item);
+    }
+  }
+  pairDropdown.classList.remove("hidden");
+}
+
+function hideDropdown() {
+  pairDropdown.classList.add("hidden");
+}
+
+pairSearchInput.addEventListener("input", () => {
+  renderDropdown(pairSearchInput.value);
+});
+
+pairSearchInput.addEventListener("focus", () => {
+  if (pairMap.size > 0) renderDropdown(pairSearchInput.value);
+});
+
+pairSearchInput.addEventListener("blur", () => {
+  // Slight delay so a mousedown on a dropdown item can register first.
+  setTimeout(hideDropdown, 150);
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".combo-wrap")) hideDropdown();
+});
+
+function selectPair(coindcxPair) {
   if (!coindcxPair) return;
   const binanceSymbol = pairMap.get(coindcxPair);
   if (!binanceSymbol || binanceSymbol === activeSymbol) return;
@@ -101,7 +167,7 @@ pairSelect.addEventListener("change", () => {
   statSymbol.textContent = binanceSymbol;
   clearDepthDisplay();
   startFullDepthPipeline(binanceSymbol, 0);
-});
+}
 
 function clearDepthDisplay() {
   bidsTbody.innerHTML = "";
@@ -310,7 +376,53 @@ function formatPrice(n) {
   return s;
 }
 
+// ---------------- Custom price-range query (bids / asks) ----------------
+
+function computeRangeTotal(book, min, max) {
+  let total = 0;
+  let levels = 0;
+  for (const [priceStr, qtyStr] of book) {
+    const p = parseFloat(priceStr);
+    if (p >= min && p <= max) {
+      total += parseFloat(qtyStr);
+      levels++;
+    }
+  }
+  return { total, levels };
+}
+
+function updateRangeQueries() {
+  const bidMin = parseFloat(bidRangeMinEl.value);
+  const bidMax = parseFloat(bidRangeMaxEl.value);
+  if (!isNaN(bidMin) && !isNaN(bidMax) && bidMax >= bidMin && bidBook.size > 0) {
+    const r = computeRangeTotal(bidBook, bidMin, bidMax);
+    bidRangeQtyEl.textContent = r.total.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+    bidRangeLevelsEl.textContent = String(r.levels);
+  } else {
+    bidRangeQtyEl.textContent = "-";
+    bidRangeLevelsEl.textContent = "-";
+  }
+
+  const askMin = parseFloat(askRangeMinEl.value);
+  const askMax = parseFloat(askRangeMaxEl.value);
+  if (!isNaN(askMin) && !isNaN(askMax) && askMax >= askMin && askBook.size > 0) {
+    const r = computeRangeTotal(askBook, askMin, askMax);
+    askRangeQtyEl.textContent = r.total.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+    askRangeLevelsEl.textContent = String(r.levels);
+  } else {
+    askRangeQtyEl.textContent = "-";
+    askRangeLevelsEl.textContent = "-";
+  }
+}
+
+// Recompute immediately on every keystroke, not just on the 300ms refresh tick.
+[bidRangeMinEl, bidRangeMaxEl, askRangeMinEl, askRangeMaxEl].forEach((input) => {
+  input.addEventListener("input", updateRangeQueries);
+});
+
 function refreshTables() {
+  updateRangeQueries();
+
   if (!activeSymbol || !synced) return;
   if (bidBook.size === 0 || askBook.size === 0) return;
 

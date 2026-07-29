@@ -27,7 +27,10 @@
   </div>
   <div class="row">
     <label>Pair
-      <select id="pairSelect"><option value="">-- select CSV first --</option></select>
+      <div class="combo-wrap">
+        <input type="text" id="pairSearchInput" placeholder="Type to search..." autocomplete="off" disabled>
+        <div id="pairDropdown" class="dropdown-list hidden"></div>
+      </div>
     </label>
     <label>Bucket
       <select id="bucketSelect">
@@ -62,6 +65,33 @@
     <div><span class="lbl">Best Bid</span><span id="bestBid" class="big green">-</span></div>
     <div><span class="lbl">Best Ask</span><span id="bestAsk" class="big red">-</span></div>
     <div><span class="lbl">Spread</span><span id="spread" class="big">-</span></div>
+  </div>
+</section>
+
+<section class="range-panel">
+  <div class="range-box">
+    <h3>Bid Range Query <span class="muted">(qty between prices)</span></h3>
+    <div class="range-inputs">
+      <input type="number" id="bidRangeMin" placeholder="Min price" step="any" inputmode="decimal">
+      <span class="muted">to</span>
+      <input type="number" id="bidRangeMax" placeholder="Max price" step="any" inputmode="decimal">
+    </div>
+    <div class="range-result">
+      <div><span class="lbl">Total Qty</span><span id="bidRangeQty" class="big green">-</span></div>
+      <div><span class="lbl">Levels</span><span id="bidRangeLevels" class="val">-</span></div>
+    </div>
+  </div>
+  <div class="range-box">
+    <h3>Ask Range Query <span class="muted">(qty between prices)</span></h3>
+    <div class="range-inputs">
+      <input type="number" id="askRangeMin" placeholder="Min price" step="any" inputmode="decimal">
+      <span class="muted">to</span>
+      <input type="number" id="askRangeMax" placeholder="Max price" step="any" inputmode="decimal">
+    </div>
+    <div class="range-result">
+      <div><span class="lbl">Total Qty</span><span id="askRangeQty" class="big red">-</span></div>
+      <div><span class="lbl">Levels</span><span id="askRangeLevels" class="val">-</span></div>
+    </div>
   </div>
 </section>
 

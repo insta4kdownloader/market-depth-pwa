@@ -69,6 +69,114 @@ select, .btn {
   border-bottom: 1px solid var(--border);
 }
 
+/* Searchable pair combobox */
+.combo-wrap {
+  position: relative;
+}
+
+.combo-wrap input[type="text"] {
+  background: #24243a;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  width: 160px;
+}
+.combo-wrap input[type="text"]:disabled {
+  opacity: 0.5;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 220px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #20202f;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.dropdown-list.hidden { display: none; }
+
+.dropdown-item {
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover, .dropdown-item.active {
+  background: #303050;
+}
+.dropdown-item mark {
+  background: var(--accent);
+  color: white;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.dropdown-empty {
+  padding: 10px 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Custom price-range query panels */
+.range-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 12px 10px 12px;
+}
+
+@media (max-width: 640px) {
+  .range-panel { grid-template-columns: 1fr; }
+}
+
+.range-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.range-box h3 {
+  font-size: 13px;
+  margin: 0 0 10px 0;
+}
+
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.range-inputs input[type="number"] {
+  background: #24243a;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  width: 100%;
+  min-width: 0;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+.range-result {
+  display: flex;
+  gap: 20px;
+}
+
+.range-result > div {
+  display: flex;
+  flex-direction: column;
+}
+
 .status-grid, .top-of-book {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
