@@ -26,6 +26,12 @@
     <span id="csvName" class="muted">No file selected</span>
   </div>
   <div class="row">
+    <button id="btnSelectKeys" class="btn">Select Keys File</button>
+    <input type="file" id="keysFileInput" accept=".json,application/json" hidden>
+    <span id="keysFileName" class="muted">No keys file selected</span>
+    <button id="btnRefreshPositions" class="btn" disabled>Refresh Positions</button>
+  </div>
+  <div class="row">
     <label>Pair
       <div class="combo-wrap">
         <input type="text" id="pairSearchInput" placeholder="Type to search..." autocomplete="off" disabled>
@@ -52,6 +58,13 @@
     </label>
   </div>
 </header>
+
+<section class="positions-panel">
+  <div class="row">
+    <span id="positionsStatus" class="muted">Select a keys file to load your open CoinDCX positions.</span>
+  </div>
+  <div id="positionsList" class="positions-list"></div>
+</section>
 
 <section class="status-panel">
   <div class="status-grid">
@@ -130,7 +143,7 @@
 </main>
 
 <footer class="footer muted">
-  CSV format: <code>coindcxPair,binancePair</code> per line (header row skipped). Data streams directly from your device to Binance's public API - nothing is sent anywhere else.
+  CSV format: <code>coindcxPair,binancePair</code> per line (header row skipped). Keys file format: JSON with <code>apiKey</code> and <code>apiSecret</code> fields - use a <strong>read-only</strong> CoinDCX key. The keys file is read fresh from disk each time you tap "Select Keys File" and is held only in memory for this session - never saved, cached, or sent anywhere except directly to CoinDCX to sign your own requests.
 </footer>
 
 <script src="app.js"></script>

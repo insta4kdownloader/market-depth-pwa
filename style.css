@@ -124,7 +124,47 @@ select, .btn {
   font-size: 13px;
 }
 
-/* Trade Depth Analyzer */
+/* Live positions (from CoinDCX keys file) */
+.positions-panel {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.positions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.position-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: #24243a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+.position-row:active { background: #303050; }
+
+.pos-pair { font-weight: 700; }
+
+.pos-dir {
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+.pos-dir.long { background: rgba(61,220,132,0.15); color: var(--green); }
+.pos-dir.short { background: rgba(255,92,92,0.15); color: var(--red); }
+
+.pos-entry, .pos-tpsl { color: var(--muted); }
 .trade-panel {
   background: var(--panel);
   border-bottom: 1px solid var(--border);

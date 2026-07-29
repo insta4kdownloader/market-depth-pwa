@@ -1,7 +1,7 @@
 // Caches only the app shell (HTML/CSS/JS/icons) so the app opens instantly.
 // Never touches requests to binance.com - those always go straight to the network.
 
-const CACHE_NAME = "market-depth-shell-v3";
+const CACHE_NAME = "market-depth-shell-v4";
 const SHELL_FILES = [
   "./",
   "./index.html",
