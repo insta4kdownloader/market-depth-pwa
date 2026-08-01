@@ -1,6 +1,6 @@
 {
-  "name": "Live Market Depth Viewer",
-  "short_name": "MarketDepth",
+  "name": "Funding Rate Tracker",
+  "short_name": "Funding",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

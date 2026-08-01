@@ -32,267 +32,92 @@ body {
 
 .row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
 }
 .row:last-child { margin-bottom: 0; }
 
-label {
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-  color: var(--muted);
-  gap: 2px;
+h1 {
+  font-size: 18px;
+  margin: 0;
+  flex: 1;
 }
 
-select, .btn {
-  background: #24243a;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 14px;
-}
-
-.btn {
-  cursor: pointer;
-  font-weight: 600;
-}
-.btn:active { background: #303050; }
-
-.muted { color: var(--muted); font-size: 12px; }
-
-.status-panel {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Searchable pair combobox */
-.combo-wrap {
-  position: relative;
-}
-
-.combo-wrap input[type="text"] {
-  background: #24243a;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 14px;
-  width: 160px;
-}
-.combo-wrap input[type="text"]:disabled {
-  opacity: 0.5;
-}
-
-.dropdown-list {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  width: 220px;
-  max-height: 240px;
-  overflow-y: auto;
-  background: #20202f;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  z-index: 50;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-.dropdown-list.hidden { display: none; }
-
-.dropdown-item {
-  padding: 9px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.dropdown-item:last-child { border-bottom: none; }
-.dropdown-item:hover, .dropdown-item.active {
-  background: #303050;
-}
-.dropdown-item mark {
-  background: var(--accent);
-  color: white;
-  border-radius: 3px;
-  padding: 0 1px;
-}
-.dropdown-empty {
-  padding: 10px 12px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-/* Trade Depth Analyzer */
-.trade-panel {
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 12px;
-}
-
-.trade-panel > h3 {
-  font-size: 13px;
-  margin: 0 0 10px 0;
-}
-
-.trade-inputs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.trade-inputs label {
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-  color: var(--muted);
-  gap: 4px;
-}
-
-.trade-inputs input[type="number"], .trade-inputs select {
-  background: #24243a;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 14px;
+.val {
   font-family: ui-monospace, Menlo, monospace;
-  width: 100%;
-}
-
-.trade-warning {
+  font-weight: 600;
   font-size: 12px;
-  color: #ffb84d;
-  min-height: 16px;
-  margin-bottom: 8px;
 }
-
-.trade-results {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-@media (max-width: 640px) {
-  .trade-results { grid-template-columns: 1fr; }
-}
-
-.trade-results h4 {
-  font-size: 12px;
-  margin: 0 0 8px 0;
-}
-
-.range-box {
-  background: #1b1b2a;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.range-result {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.range-result > div {
-  display: flex;
-  flex-direction: column;
-}
-
-.status-grid, .top-of-book {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.status-grid > div, .top-of-book > div {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-}
-
-.lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
-.val { font-weight: 600; font-family: ui-monospace, Menlo, monospace; }
 .val.warn { color: #ffb84d; }
 .val.ok { color: var(--green); }
 .val.err { color: var(--red); }
 
-.big { font-size: 18px; font-weight: 700; font-family: ui-monospace, Menlo, monospace; }
-.green { color: var(--green); }
-.red { color: var(--red); }
+.muted { color: var(--muted); font-size: 12px; }
 
-.depth-panels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 10px 12px;
-}
-
-@media (max-width: 640px) {
-  .depth-panels { grid-template-columns: 1fr; }
-}
-
-.panel {
-  background: var(--panel);
+#filterInput {
+  background: #24243a;
+  color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  flex: 1;
   min-width: 0;
 }
 
-.panel h2 {
-  font-size: 13px;
-  margin: 2px 4px 8px 4px;
-  font-weight: 700;
-}
-
 .table-wrap {
-  max-height: 50vh;
-  overflow-y: auto;
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-family: ui-monospace, Menlo, monospace;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 thead th {
   position: sticky;
-  top: 0;
+  top: 68px;
   background: var(--panel);
   text-align: left;
-  padding: 4px 6px;
+  padding: 10px 10px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
+thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+thead th.sortable:active { background: #24243a; }
+
+.sort-arrow {
+  display: inline-block;
+  width: 10px;
+  margin-left: 3px;
+}
+th.sort-asc .sort-arrow::after { content: "\2191"; color: var(--accent); }
+th.sort-desc .sort-arrow::after { content: "\2193"; color: var(--accent); }
+
 tbody td {
-  padding: 5px 6px;
+  padding: 9px 10px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   white-space: nowrap;
 }
 
-#bidsTable tbody tr:hover, #bidsTable tbody tr { background: rgba(61, 220, 132, 0.06); }
-#asksTable tbody tr:hover, #asksTable tbody tr { background: rgba(255, 92, 92, 0.06); }
+tbody tr:active { background: rgba(255,255,255,0.03); }
+
+.symbol-cell { font-weight: 700; }
+
+.rate-positive { color: var(--green); }
+.rate-negative { color: var(--red); }
 
 .footer {
   padding: 14px 12px 20px 12px;
   text-align: center;
-}
-
-code {
-  background: #24243a;
-  padding: 1px 5px;
-  border-radius: 4px;
 }
